@@ -1277,6 +1277,7 @@ void UAS::setExternalControlSetpoint(float roll, float pitch, float yaw, float t
     static float manualThrust = 0.0;
     static quint16 manualButtons = 0;
     static quint8 countSinceLastTransmission = 0; // Track how many calls to this function have occurred since the last MAVLink transmission
+	static int lastTxTime=0;
 
     // Transmit the external setpoints only if they've changed OR if it's been a little bit since they were last transmit. To make sure there aren't issues with
     // response rate, we make sure that a message is transmit when the commands have changed, then one more time, and then switch to the lower transmission rate
@@ -1298,6 +1299,8 @@ void UAS::setExternalControlSetpoint(float roll, float pitch, float yaw, float t
 
     // Now if we should trigger an update, let's do that
     if (sendCommand) {
+		lastTxTime=QGC::groundTimeMilliseconds();
+		qDebug()<<(QGC::groundTimeMilliseconds()-lastTxTime);
         // Save the new manual control inputs
         manualRollAngle = roll;
         manualPitchAngle = pitch;
