@@ -55,7 +55,7 @@ Joystick::Joystick(const QString& name, int axisCount, int buttonCount, int hatC
     , _rgButtonValues(NULL)
     , _lastButtonBits(0)
     , _throttleMode(ThrottleModeCenterZero)
-    , _exponential(false)
+    , _exponential(0)
     , _accumulator(false)
     , _deadband(false)
     , _activeVehicle(NULL)
@@ -109,7 +109,7 @@ void Joystick::_setDefaultCalibration(void) {
     _rgFunctionAxis[yawFunction]        = 0;
     _rgFunctionAxis[throttleFunction]   = 1;
 
-    _exponential = false;
+    _exponential = 0;
     _accumulator = false;
     _deadband = false;
     _throttleMode = ThrottleModeCenterZero;
@@ -162,7 +162,7 @@ void Joystick::_loadSettings(void)
     qCDebug(JoystickLog) << "_loadSettings " << _name;
 
     _calibrated = settings.value(_calibratedSettingsKey, false).toBool();
-    _exponential = settings.value(_exponentialSettingsKey, false).toBool();
+    _exponential = settings.value(_exponentialSettingsKey, 0).toFloat();
     _accumulator = settings.value(_accumulatorSettingsKey, false).toBool();
     _deadband = settings.value(_deadbandSettingsKey, false).toBool();
 
@@ -434,16 +434,16 @@ void Joystick::run(void)
                 throttle_accu = std::max(static_cast<float>(-1.f), std::min(throttle_accu, static_cast<float>(1.f)));
                 throttle = throttle_accu;
             }
-            if ( _exponential ) {
+            if ( _exponential != 0 ) {
                 // Exponential (0% to -50% range like most RC radios)
                 // 0 for no exponential
                 // -0.5 for strong exponential
-                float expo = -0.35f;
+                //float expo = -0.35f;
 
                 // Calculate new RPY with exponential applied
-                roll =      -expo*powf(roll,3) + (1+expo)*roll;
-                pitch =     -expo*powf(pitch,3) + (1+expo)*pitch;
-                yaw =       -expo*powf(yaw,3) + (1+expo)*yaw;
+                roll =      -_exponential*powf(roll,3) + (1+_exponential)*roll;
+                pitch =     -_exponential*powf(pitch,3) + (1+_exponential)*pitch;
+                yaw =       -_exponential*powf(yaw,3) + (1+_exponential)*yaw;
             }
 
             // Adjust throttle to 0:1 range
@@ -673,12 +673,12 @@ void Joystick::setThrottleMode(int mode)
     emit throttleModeChanged(_throttleMode);
 }
 
-bool Joystick::exponential(void)
+float Joystick::exponential(void)
 {
     return _exponential;
 }
 
-void Joystick::setExponential(bool expo)
+void Joystick::setExponential(float expo)
 {
     _exponential = expo;
 
