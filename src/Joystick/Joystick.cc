@@ -453,17 +453,6 @@ void Joystick::run(void)
                 throttle = throttle_accu;
             }
 
-            float roll_limited = std::max(static_cast<float>(-M_PI_4), std::min(roll, static_cast<float>(M_PI_4)));
-            float pitch_limited = std::max(static_cast<float>(-M_PI_4), std::min(pitch, static_cast<float>(M_PI_4)));
-            float yaw_limited = std::max(static_cast<float>(-M_PI_4), std::min(yaw, static_cast<float>(M_PI_4)));
-            float throttle_limited = std::max(static_cast<float>(-M_PI_4), std::min(throttle, static_cast<float>(M_PI_4)));
-
-            // Map from unit circle to linear range and limit
-            roll =      std::max(-1.0f, std::min(tanf(asinf(roll_limited)), 1.0f));
-            pitch =     std::max(-1.0f, std::min(tanf(asinf(pitch_limited)), 1.0f));
-            yaw =       std::max(-1.0f, std::min(tanf(asinf(yaw_limited)), 1.0f));
-            throttle =  std::max(-1.0f, std::min(tanf(asinf(throttle_limited)), 1.0f));
-            
             if ( _exponential != 0 ) {
                 // Exponential (0% to -50% range like most RC radios)
                 //_exponential is set by a slider in joystickConfig.qml
