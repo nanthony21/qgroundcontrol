@@ -531,10 +531,10 @@ SetupPage {
 
                                 QGCCheckBox {
                                     id:         deadband
-                                    checked:    controller.deadbandToggle
+                                    checked:    _activeJoystick.deadbandToggle
                                     text:       qsTr("Deadbands")
 
-                                    onClicked:  controller.deadbandToggle = checked
+                                    onClicked:  _activeJoystick.deadbandToggle = checked
                                 }
                             }
                             Row{
@@ -772,15 +772,19 @@ SetupPage {
                     Connections {
                         target: controller
 
-                        onAxisValueChanged: {
-                            if (axisMonitorRepeater.itemAt(axis)) {
-                                axisMonitorRepeater.itemAt(axis).loader.item.axisValue = value
-                            }
-                        }
-
                         onAxisDeadbandChanged: {
                             if (axisMonitorRepeater.itemAt(axis)) {
                                 axisMonitorRepeater.itemAt(axis).loader.item.deadbandValue = value
+                            }
+                        }
+                    }
+
+                    Connections {
+                        target: _activeJoystick
+
+                        onRawAxisValueChanged: {
+                            if (axisMonitorRepeater.itemAt(index)) {
+                                axisMonitorRepeater.itemAt(index).loader.item.axisValue = value
                             }
                         }
                     }
