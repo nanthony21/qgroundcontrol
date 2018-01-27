@@ -44,6 +44,14 @@ public:
             , reversed(false) {}
     } Calibration_t;
 
+    typedef struct Axis_t{
+        int             value;
+        Calibration_t   calibration;
+        Axis_t()
+            : value(0)
+            , calibration(Calibration_t()) {}
+    } Axis_t;
+
     typedef enum {
         rollFunction,
         pitchFunction,
@@ -167,7 +175,7 @@ protected:
     void    _setDefaultCalibration(void);
     void    _saveSettings(void);
     void    _loadSettings(void);
-    float   _adjustRange(int value, Calibration_t calibration, bool withDeadbands);
+    float   _adjustRange(Axis_t axis, bool withDeadbands);
     void    _buttonAction(const QString& action);
     bool    _validAxis(int axis);
     bool    _validButton(int button);
@@ -203,8 +211,7 @@ protected:
     static int          _transmitterMode;
     CalibrationMode_t   _calibrationMode;
 
-    int*                _rgAxisValues;
-    Calibration_t*      _rgCalibration;
+    Axis_t*             _rgAxes;
     int                 _rgFunctionAxis[maxFunction];
 
     bool*               _rgButtonValues;

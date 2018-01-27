@@ -49,8 +49,6 @@ JoystickConfigController::JoystickConfigController(void)
     , _currentStep(-1)
     , _axisCount(0)
     , _rgAxisInfo(NULL)
-    , _axisValueSave(NULL)
-    , _axisRawValue(NULL)
     , _calState(calStateAxisWait)
     , _statusText(NULL)
     , _cancelButton(NULL)
@@ -150,8 +148,8 @@ void JoystickConfigController::_axisValueChanged(int axis, int value)
 {
     if (_validAxis(axis)) {
         // We always update raw values
-        _axisRawValue[axis] = value;
-        emit axisValueChanged(axis, _axisRawValue[axis]);
+        _rgAxisInfo[axis].rawValue = value;
+        emit axisValueChanged(axis, _rgAxisInfo[axis].rawValue);
             
         //qCDebug(JoystickConfigControllerLog) << "Raw value" << axis << value;
         
@@ -224,8 +222,8 @@ void JoystickConfigController::_saveAllTrims(void)
     // trims reset to correct values.
     
     for (int i=0; i<_axisCount; i++) {
-        qCDebug(JoystickConfigControllerLog) << "_saveAllTrims trim" << _axisRawValue[i];
-        _rgAxisInfo[i].axisTrim = _axisRawValue[i];
+        qCDebug(JoystickConfigControllerLog) << "_saveAllTrims trim" << _rgAxisInfo[i].rawValue;
+        _rgAxisInfo[i].axisTrim = _rgAxisInfo[i].rawValue;
     }
     _advanceState();
 }
@@ -311,7 +309,7 @@ void JoystickConfigController::_inputStickDetect(Joystick::AxisFunction_t functi
     if (_stickDetectAxis == _axisNoAxis) {
         // We have not detected enough movement on a axis yet
         
-        if (abs(_axisValueSave[axis] - value) > _calMoveDelta) {
+        if (abs(_rgAxisInfo[axis].valueSave - value) > _calMoveDelta) {
             // Stick has moved far enough to consider it as being selected for the function
             
             qCDebug(JoystickConfigControllerLog) << "_inputStickDetect starting settle wait, function:axis:value" << function << axis << value;
@@ -331,7 +329,7 @@ void JoystickConfigController::_inputStickDetect(Joystick::AxisFunction_t functi
             info->function = function;
             
             // Axis should be at max value, if it is below initial set point the the axis is reversed.
-            info->reversed = value < _axisValueSave[axis];
+            info->reversed = value < _rgAxisInfo[axis].valueSave;
             
             if (info->reversed) {
                 _rgAxisInfo[axis].axisMin = value;
@@ -339,7 +337,7 @@ void JoystickConfigController::_inputStickDetect(Joystick::AxisFunction_t functi
                 _rgAxisInfo[axis].axisMax = value;
             }
             
-            qCDebug(JoystickConfigControllerLog) << "_inputStickDetect saving values, function:axis:value:reversed:_axisValueSave" << function << axis << value << info->reversed << _axisValueSave[axis];
+            qCDebug(JoystickConfigControllerLog) << "_inputStickDetect saving values, function:axis:value:reversed:valueSave" << function << axis << value << info->reversed << info->valueSave;
             
             _signalAllAttitudeValueChanges();
             
@@ -617,7 +615,7 @@ void JoystickConfigController::_calSaveCurrentValues(void)
 {
 	qCDebug(JoystickConfigControllerLog) << "_calSaveCurrentValues";
     for (int i = 0; i < _axisCount; i++) {
-        _axisValueSave[i] = _axisRawValue[i];
+        _rgAxisInfo[i].valueSave = _rgAxisInfo[i].rawValue;
     }
 }
 
@@ -770,8 +768,6 @@ void JoystickConfigController::_activeJoystickChanged(Joystick* joystick)
         // This will reset _rgFunctionAxis values to -1 to prevent out-of-bounds accesses
         _resetInternalCalibrationValues();
         delete[] _rgAxisInfo;
-        delete[] _axisValueSave;
-        delete[] _axisRawValue;
         _axisCount = 0;
         _activeJoystick = NULL;
     }
@@ -784,8 +780,6 @@ void JoystickConfigController::_activeJoystickChanged(Joystick* joystick)
         _activeJoystick->startCalibrationMode(Joystick::CalibrationModeMonitor);
         _axisCount = _activeJoystick->axisCount();
         _rgAxisInfo = new struct AxisInfo[_axisCount];
-        _axisValueSave = new int[_axisCount];
-        _axisRawValue = new int[_axisCount];
         _setInternalCalibrationValuesFromSettings();
         connect(_activeJoystick, &Joystick::rawAxisValueChanged, this, &JoystickConfigController::_axisValueChanged);
     }

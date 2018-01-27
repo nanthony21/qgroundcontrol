@@ -149,6 +149,8 @@ private:
         int                         axisMax;    ///< Maximum axis value
         int                         axisTrim;   ///< Trim position
         int                         deadband;   ///< Deadband
+        int                         rawValue;   ///< Current set of raw axis values
+        int                         valueSave;  ///< Saved values prior to detecting axis movement
     };
     
     Joystick* _activeJoystick;
@@ -216,8 +218,6 @@ private:
     static const int    _axisNoAxis = -1;   ///< Signals no axis set
     static const int    _axisMinimum = 4;   ///< Minimum numner of joystick axes required to run PX4
     struct AxisInfo*    _rgAxisInfo;        ///< Information associated with each axis
-    int*                _axisValueSave;     ///< Saved values prior to detecting axis movement
-    int*                _axisRawValue;      ///< Current set of raw axis values
 
     enum calStates _calState;               ///< Current calibration state
     int     _calStateCurrentAxis;           ///< Current axis being worked on in calStateIdentify and calStateDetectInversion
