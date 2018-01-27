@@ -57,7 +57,6 @@ public:
     Q_PROPERTY(int yawAxisReversed      READ yawAxisReversed        NOTIFY yawAxisReversedChanged)
     Q_PROPERTY(int throttleAxisReversed READ throttleAxisReversed   NOTIFY throttleAxisReversedChanged)
 
-    Q_PROPERTY(int transmitterMode READ transmitterMode WRITE setTransmitterMode NOTIFY transmitterModeChanged)
     Q_PROPERTY(QString imageHelp MEMBER _imageHelp NOTIFY imageHelpChanged)
     Q_PROPERTY(bool calibrating READ calibrating NOTIFY calibratingChanged)
     
@@ -77,9 +76,6 @@ public:
     bool yawAxisReversed(void);
     bool throttleAxisReversed(void);
 
-    int transmitterMode(void) { return _transmitterMode; }
-    void setTransmitterMode(int mode);
-
     bool calibrating(void) { return _currentStep != -1; }
     
 signals:
@@ -96,7 +92,6 @@ signals:
     void throttleAxisReversedChanged(bool reversed);
     
     void imageHelpChanged(QString source);
-    void transmitterModeChanged(int mode);
     void calibratingChanged(void);
     
     // @brief Signalled when in unit test mode and a message box should be displayed by the next button
@@ -143,8 +138,7 @@ private:
     };
     
     Joystick* _activeJoystick;
-    
-    int _transmitterMode;
+
     int _currentStep;  ///< Current step of state machine
     
     const struct stateMachineEntry* _getStateMachineEntry(int step);

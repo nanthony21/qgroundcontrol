@@ -325,6 +325,7 @@ void Joystick::setTXMode(int mode) {
         _remapAxes(_transmitterMode, mode, _rgFunctionAxis);
         _transmitterMode = mode;
         _saveSettings();
+        emit TXModeChanged(_transmitterMode);
     } else {
         qCWarning(JoystickLog) << "Invalid mode:" << mode;
     }

@@ -45,7 +45,6 @@ const char*  JoystickConfigController::_imagePitchDown =    "joystickPitchDown.p
 
 JoystickConfigController::JoystickConfigController(void)
     : _activeJoystick(NULL)
-    , _transmitterMode(2)
     , _currentStep(-1)
     , _rgAxisInfo(NULL)
     , _calState(calStateAxisWait)
@@ -463,8 +462,6 @@ void JoystickConfigController::_setInternalCalibrationValuesFromSettings(void)
             _rgAxisInfo[paramAxis].function = (Joystick::AxisFunction_t)function;
         }
     }
-
-    _transmitterMode = _activeJoystick->getTXMode();
     
     _signalAllAttitudeValueChanges();
 }
@@ -612,7 +609,7 @@ void JoystickConfigController::_setHelpImage(const char* imageFile)
 {
     QString file = _imageFilePrefix;
     
-    switch(_transmitterMode) {
+    switch(_activeJoystick->_transmitterMode) {
     case 1:
         file += _imageFileMode1Dir;
         break;
@@ -694,20 +691,6 @@ bool JoystickConfigController::throttleAxisReversed(void)
     }
 }
 
-void JoystickConfigController::setTransmitterMode(int mode)
-{
-    if (mode > 0 && mode <= 4) {
-        _transmitterMode = mode;
-        if (_currentStep != -1) { // This should never be true, mode selection is disabled during calibration
-            const stateMachineEntry* state = _getStateMachineEntry(_currentStep);
-            _setHelpImage(state->image);
-        } else {
-            _activeJoystick->setTXMode(mode);
-            _setInternalCalibrationValuesFromSettings();
-        }
-    }
-}
-
 void JoystickConfigController::_signalAllAttitudeValueChanges(void)
 {
     emit rollAxisMappedChanged(rollAxisMapped());
@@ -719,8 +702,6 @@ void JoystickConfigController::_signalAllAttitudeValueChanges(void)
     emit pitchAxisReversedChanged(pitchAxisReversed());
     emit yawAxisReversedChanged(yawAxisReversed());
     emit throttleAxisReversedChanged(throttleAxisReversed());
-
-    emit transmitterModeChanged(_transmitterMode);
 }
 
 void JoystickConfigController::_activeJoystickChanged(Joystick* joystick)
