@@ -453,9 +453,7 @@ void JoystickConfigController::_resetInternalCalibrationValues(void)
 
 /// @brief Sets internal calibration values from the stored settings
 void JoystickConfigController::_setInternalCalibrationValuesFromSettings(void)
-{
-    Joystick* joystick = _joystickManager->activeJoystick();
-    
+{  
     // Initialize all function mappings to not set
     
     for (int i=0; i<_axisCount; i++) {
@@ -470,7 +468,7 @@ void JoystickConfigController::_setInternalCalibrationValuesFromSettings(void)
     for (int axis=0; axis<_axisCount; axis++) {
         struct AxisInfo* info = &_rgAxisInfo[axis];
         
-        Joystick::Calibration_t calibration = joystick->getCalibration(axis);
+        Joystick::Calibration_t calibration = _activeJoystick->getCalibration(axis);
         info->axisTrim = calibration.center;
         info->axisMin = calibration.min;
         info->axisMax = calibration.max;
@@ -478,7 +476,7 @@ void JoystickConfigController::_setInternalCalibrationValuesFromSettings(void)
         info->deadband = calibration.deadband;
         emit axisDeadbandChanged(axis,info->deadband);
 
-        qCDebug(JoystickConfigControllerLog) << "Read settings name:axis:min:max:trim:reversed" << joystick->name() << axis << info->axisMin << info->axisMax << info->axisTrim << info->reversed;
+        qCDebug(JoystickConfigControllerLog) << "Read settings name:axis:min:max:trim:reversed" << _activeJoystick->name() << axis << info->axisMin << info->axisMax << info->axisTrim << info->reversed;
     }
     
     for (int function=0; function<Joystick::maxFunction; function++) {
@@ -545,8 +543,6 @@ void JoystickConfigController::_validateCalibration(void)
 /// @brief Saves the rc calibration values to the board parameters.
 void JoystickConfigController::_writeCalibration(void)
 {
-    Joystick* joystick = _joystickManager->activeJoystick();
-
     _validateCalibration();
     
     for (int axis=0; axis<_axisCount; axis++) {
@@ -560,12 +556,12 @@ void JoystickConfigController::_writeCalibration(void)
         calibration.reversed = info->reversed;
         calibration.deadband = info->deadband;
         
-        joystick->setCalibration(axis, calibration);
+        _activeJoystick->setCalibration(axis, calibration);
     }
     
     // Write function mapping parameters
     for (int function=0; function<Joystick::maxFunction; function++) {
-        joystick->setFunctionAxis((Joystick::AxisFunction_t)function, _rgFunctionAxisMapping[function]);
+        _activeJoystick->setFunctionAxis((Joystick::AxisFunction_t)function, _rgFunctionAxisMapping[function]);
     }
     
     _stopCalibration();
