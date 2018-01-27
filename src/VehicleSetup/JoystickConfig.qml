@@ -481,7 +481,7 @@ SetupPage {
                                         maximumValue: 0.75
 
                                         Component.onCompleted: value=-_activeJoystick.exponential
-                                        onValueChanged: _activeJoystick.exponential=-value
+                                        onValueChanged: _activeJoystick.exponential = -value
                                      }
 
                                     QGCLabel {
@@ -721,37 +721,37 @@ SetupPage {
                     QGCRadioButton {
                         exclusiveGroup: modeGroup
                         text:           "1"
-                        checked:        controller.transmitterMode == 1
+                        checked:        _activeJoystick.TXMode == 1
                         enabled:        !controller.calibrating
 
-                        onClicked: controller.transmitterMode = 1
+                        onClicked: _activeJoystick.TXMode = 1
                     }
 
                     QGCRadioButton {
                         exclusiveGroup: modeGroup
                         text:           "2"
-                        checked:        controller.transmitterMode == 2
+                        checked:        _activeJoystick.TXMode == 2
                         enabled:        !controller.calibrating
 
-                        onClicked: controller.transmitterMode = 2
+                        onClicked: _activeJoystick.TXMode = 2
                     }
 
                     QGCRadioButton {
                         exclusiveGroup: modeGroup
                         text:           "3"
-                        checked:        controller.transmitterMode == 3
+                        checked:        _activeJoystick.TXMode == 3
                         enabled:        !controller.calibrating
 
-                        onClicked: controller.transmitterMode = 3
+                        onClicked: _activeJoystick.TXMode = 3
                     }
 
                     QGCRadioButton {
                         exclusiveGroup: modeGroup
                         text:           "4"
-                        checked:        controller.transmitterMode == 4
+                        checked:        _activeJoystick.TXMode == 4
                         enabled:        !controller.calibrating
 
-                        onClicked: controller.transmitterMode = 4
+                        onClicked: _activeJoystick.TXMode = 4
                     }
                 }
 

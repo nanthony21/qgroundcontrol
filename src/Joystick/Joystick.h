@@ -86,6 +86,7 @@ public:
     Q_PROPERTY(bool accumulator READ accumulator WRITE setAccumulator NOTIFY accumulatorChanged)
     Q_PROPERTY(bool deadbandToggle READ getDeadbandToggle WRITE setDeadbandToggle NOTIFY deadbandToggleChanged)
 	Q_PROPERTY(bool requiresCalibration READ requiresCalibration CONSTANT)
+    Q_PROPERTY(int TXMode READ getTXMode WRITE setTXMode NOTIFY TXModeChanged)
     
     // Property accessors
 
@@ -157,6 +158,8 @@ signals:
     void deadbandToggleChanged(bool deadband);
 
     void enabledChanged(bool enabled);
+
+    void TXModeChanged(int mode);
 
     /// Signal containing new joystick information
     ///     @param roll     Range is -1:1, negative meaning roll left, positive meaning roll right
