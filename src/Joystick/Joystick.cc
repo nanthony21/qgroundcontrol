@@ -50,8 +50,7 @@ Joystick::Joystick(const QString& name, int axisCount, int buttonCount, int hatC
     , _hatButtonCount(4*hatCount)
     , _totalButtonCount(_buttonCount+_hatButtonCount)
     , _calibrationMode(CalibrationModeOff)
-    , _rgAxisValues(NULL)
-    , _rgCalibration(NULL)
+    , _rgAxes(NULL)
     , _rgButtonValues(NULL)
     , _lastButtonBits(0)
     , _throttleMode(ThrottleModeCenterZero)
@@ -64,13 +63,9 @@ Joystick::Joystick(const QString& name, int axisCount, int buttonCount, int hatC
     , _multiVehicleManager(multiVehicleManager)
 {
 
-    _rgAxisValues = new int[_axisCount];
-    _rgCalibration = new Calibration_t[_axisCount];
+    _rgAxes = new Axis_t[_axisCount];
     _rgButtonValues = new bool[_totalButtonCount];
 
-    for (int i=0; i<_axisCount; i++) {
-        _rgAxisValues[i] = 0;
-    }
     for (int i=0; i<_totalButtonCount; i++) {
         _rgButtonValues[i] = false;
     }
@@ -84,8 +79,7 @@ Joystick::Joystick(const QString& name, int axisCount, int buttonCount, int hatC
 
 Joystick::~Joystick()
 {
-    delete[] _rgAxisValues;
-    delete[] _rgCalibration;
+    delete[] _rgAxes;
     delete[] _rgButtonValues;
 }
 
@@ -100,11 +94,11 @@ void Joystick::_setDefaultCalibration(void) {
 
     for(int axis = 0; axis < _axisCount; axis++) {
         Joystick::Calibration_t calibration;
-        _rgCalibration[axis] = calibration;
+        _rgAxes[axis].calibration = calibration;
     }
 
-    _rgCalibration[1].reversed = true;
-    _rgCalibration[3].reversed = true;
+    _rgAxes[1].calibration.reversed = true;
+    _rgAxes[3].calibration.reversed = true;
 
     // Default TX Mode 2 axis assignments for gamecontrollers
     _rgFunctionAxis[rollFunction]       = 2;
@@ -192,7 +186,7 @@ void Joystick::_loadSettings(void)
     QString deadbndTpl  ("Axis%1Deadbnd");
 
     for (int axis=0; axis<_axisCount; axis++) {
-        Calibration_t* calibration = &_rgCalibration[axis];
+        Calibration_t* calibration = &_rgAxes[axis].calibration;
 
         calibration->center = settings.value(trimTpl.arg(axis), 0).toInt(&convertOk);
         badSettings |= !convertOk;
@@ -266,7 +260,7 @@ void Joystick::_saveSettings(void)
     QString deadbndTpl  ("Axis%1Deadbnd");
 
     for (int axis=0; axis<_axisCount; axis++) {
-        Calibration_t* calibration = &_rgCalibration[axis];
+        Calibration_t* calibration = &_rgAxes[axis].calibration;
 
         settings.setValue(trimTpl.arg(axis), calibration->center);
         settings.setValue(minTpl.arg(axis), calibration->min);
@@ -337,11 +331,14 @@ void Joystick::setTXMode(int mode) {
 }
 
 /// Adjust the raw axis value to the -1:1 range given calibration information
-float Joystick::_adjustRange(int value, Calibration_t calibration, bool withDeadbands)
+float Joystick::_adjustRange(Axis_t axis, bool withDeadbands)
 {
     float valueNormalized;
     float axisLength;
     float axisBasis;
+
+    int value = axis.value;
+    Calibration_t calibration = axis.calibration;
 
     if (value > calibration.center) {
         axisBasis = 1.0f;
@@ -403,7 +400,7 @@ void Joystick::run(void)
         for (int axisIndex=0; axisIndex<_axisCount; axisIndex++) {
             int newAxisValue = _getAxis(axisIndex);
             // Calibration code requires signal to be emitted even if value hasn't changed
-            _rgAxisValues[axisIndex] = newAxisValue;
+            _rgAxes[axisIndex].value = newAxisValue;
             emit rawAxisValueChanged(axisIndex, newAxisValue);
         }
 
@@ -433,16 +430,16 @@ void Joystick::run(void)
 
         if (_calibrationMode != CalibrationModeCalibrating && _calibrated) {
             int     axis = _rgFunctionAxis[rollFunction];
-            float   roll = _adjustRange(_rgAxisValues[axis], _rgCalibration[axis], _deadband);
+            float   roll = _adjustRange(_rgAxes[axis], _deadband);
 
                     axis = _rgFunctionAxis[pitchFunction];
-            float   pitch = _adjustRange(_rgAxisValues[axis], _rgCalibration[axis], _deadband);
+            float   pitch = _adjustRange(_rgAxes[axis], _deadband);
 
                     axis = _rgFunctionAxis[yawFunction];
-            float   yaw = _adjustRange(_rgAxisValues[axis], _rgCalibration[axis],_deadband);
+            float   yaw = _adjustRange(_rgAxes[axis], _deadband);
 
                     axis = _rgFunctionAxis[throttleFunction];
-            float   throttle = _adjustRange(_rgAxisValues[axis], _rgCalibration[axis], _throttleMode==ThrottleModeDownZero?false:_deadband);
+            float   throttle = _adjustRange(_rgAxes[axis], _throttleMode==ThrottleModeDownZero?false:_deadband);
 
             if ( _accumulator ) {
                 static float throttle_accu = 0.f;
@@ -597,7 +594,7 @@ void Joystick::setCalibration(int axis, Calibration_t& calibration)
     }
 
     _calibrated = true;
-    _rgCalibration[axis] = calibration;
+    _rgAxes[axis].calibration = calibration;
     _saveSettings();
     emit calibratedChanged(_calibrated);
 }
@@ -608,7 +605,7 @@ Joystick::Calibration_t Joystick::getCalibration(int axis)
         qCWarning(JoystickLog) << "Invalid axis index" << axis;
     }
 
-    return _rgCalibration[axis];
+    return _rgAxes[axis].calibration;
 }
 
 void Joystick::setFunctionAxis(AxisFunction_t function, int axis)
