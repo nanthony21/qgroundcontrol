@@ -742,16 +742,17 @@ void Joystick::setAccumulator(bool accu)
     emit accumulatorChanged(_accumulator);
 }
 
-bool Joystick::deadband(void)
+bool Joystick::getDeadbandToggle(void)
 {
     return _deadband;
 }
 
-void Joystick::setDeadband(bool deadband)
+void Joystick::setDeadbandToggle(bool deadband)
 {
     _deadband = deadband;
 
     _saveSettings();
+    emit deadbandToggleChanged(_deadband);
 }
 
 void Joystick::startCalibrationMode(CalibrationMode_t mode)

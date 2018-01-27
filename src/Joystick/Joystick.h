@@ -24,7 +24,7 @@ Q_DECLARE_LOGGING_CATEGORY(JoystickValuesLog)
 class Joystick : public QThread
 {
     Q_OBJECT
-
+    friend class JoystickConfigController;
 public:
     Joystick(const QString& name, int axisCount, int buttonCount, int hatCount, MultiVehicleManager* multiVehicleManager);
 
@@ -83,6 +83,7 @@ public:
     Q_PROPERTY(bool negativeThrust READ negativeThrust WRITE setNegativeThrust NOTIFY negativeThrustChanged)
     Q_PROPERTY(float exponential READ exponential WRITE setExponential NOTIFY exponentialChanged)
     Q_PROPERTY(bool accumulator READ accumulator WRITE setAccumulator NOTIFY accumulatorChanged)
+    Q_PROPERTY(bool deadbandToggle READ getDeadbandToggle WRITE setDeadbandToggle NOTIFY deadbandToggleChanged)
 	Q_PROPERTY(bool requiresCalibration READ requiresCalibration CONSTANT)
     
     // Property accessors
@@ -124,8 +125,8 @@ public:
     bool accumulator(void);
     void setAccumulator(bool accu);
 
-    bool deadband(void);
-    void setDeadband(bool accu);
+    bool getDeadbandToggle(void);
+    void setDeadbandToggle(bool accu);
 
     void setTXMode(int mode);
     int getTXMode(void) { return _transmitterMode; }
@@ -158,6 +159,8 @@ signals:
     void exponentialChanged(float exponential);
 
     void accumulatorChanged(bool accumulator);
+
+    void deadbandToggleChanged(bool deadband);
 
     void enabledChanged(bool enabled);
 

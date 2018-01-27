@@ -56,8 +56,6 @@ public:
     Q_PROPERTY(int pitchAxisReversed    READ pitchAxisReversed      NOTIFY pitchAxisReversedChanged)
     Q_PROPERTY(int yawAxisReversed      READ yawAxisReversed        NOTIFY yawAxisReversedChanged)
     Q_PROPERTY(int throttleAxisReversed READ throttleAxisReversed   NOTIFY throttleAxisReversedChanged)
-    
-    Q_PROPERTY(bool deadbandToggle            READ getDeadbandToggle        WRITE setDeadbandToggle    NOTIFY deadbandToggled)
 
     Q_PROPERTY(int transmitterMode READ transmitterMode WRITE setTransmitterMode NOTIFY transmitterModeChanged)
     Q_PROPERTY(QString imageHelp MEMBER _imageHelp NOTIFY imageHelpChanged)
@@ -78,11 +76,6 @@ public:
     bool pitchAxisReversed(void);
     bool yawAxisReversed(void);
     bool throttleAxisReversed(void);
-    
-    bool getDeadbandToggle(void);
-    void setDeadbandToggle(bool);
-
-    int axisCount(void);
 
     int transmitterMode(void) { return _transmitterMode; }
     void setTransmitterMode(int mode);
@@ -90,7 +83,6 @@ public:
     bool calibrating(void) { return _currentStep != -1; }
     
 signals:
-    void axisValueChanged(int axis, int value);
     void axisDeadbandChanged(int axis, int value);
 
     void rollAxisMappedChanged(bool mapped);
@@ -102,8 +94,6 @@ signals:
     void pitchAxisReversedChanged(bool reversed);
     void yawAxisReversedChanged(bool reversed);
     void throttleAxisReversedChanged(bool reversed);
-
-    void deadbandToggled(bool value);
     
     void imageHelpChanged(QString source);
     void transmitterModeChanged(int mode);
@@ -149,7 +139,6 @@ private:
         int                         axisMax;    ///< Maximum axis value
         int                         axisTrim;   ///< Trim position
         int                         deadband;   ///< Deadband
-        int                         rawValue;   ///< Current set of raw axis values
         int                         valueSave;  ///< Saved values prior to detecting axis movement
     };
     
@@ -213,8 +202,7 @@ private:
     int _rgFunctionAxisMapping[Joystick::maxFunction]; ///< Maps from joystick function to axis index. _axisMax indicates axis not set for this function.
 
     static const int _attitudeControls = 5;
-    
-    int                 _axisCount;         ///< Number of actual joystick axes available
+
     static const int    _axisNoAxis = -1;   ///< Signals no axis set
     static const int    _axisMinimum = 4;   ///< Minimum numner of joystick axes required to run PX4
     struct AxisInfo*    _rgAxisInfo;        ///< Information associated with each axis
