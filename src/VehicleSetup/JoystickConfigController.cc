@@ -482,14 +482,14 @@ void JoystickConfigController::_setInternalCalibrationValuesFromSettings(void)
     for (int function=0; function<Joystick::maxFunction; function++) {
         int paramAxis;
         
-        paramAxis = joystick->getFunctionAxis((Joystick::AxisFunction_t)function);
+        paramAxis = _activeJoystick->getFunctionAxis((Joystick::AxisFunction_t)function);
         if(paramAxis >= 0) {
             _rgFunctionAxisMapping[function] = paramAxis;
             _rgAxisInfo[paramAxis].function = (Joystick::AxisFunction_t)function;
         }
     }
 
-    _transmitterMode = joystick->getTXMode();
+    _transmitterMode = _activeJoystick->getTXMode();
     
     _signalAllAttitudeValueChanges();
 }
