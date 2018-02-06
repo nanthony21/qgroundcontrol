@@ -387,7 +387,7 @@ void JoystickConfigController::_inputCenterWait(Joystick::AxisFunction_t functio
     
     if (_stickDetectAxis == _axisNoAxis) {
         // Sticks have not yet moved close enough to center
-        int roughCenter = getDeadbandToggle() ? std::max(_rgAxisInfo[axis].deadband,_calRoughCenterDelta) : _calRoughCenterDelta;
+        int roughCenter = _activeJoystick->getDeadbandToggle() ? std::max(_rgAxisInfo[axis].deadband,_calRoughCenterDelta) : _calRoughCenterDelta;
         if (abs(_calCenterPoint - value) < roughCenter) {
             // Stick has moved close enough to center that we can start waiting for it to settle
             _stickDetectAxis = axis;
@@ -723,7 +723,7 @@ void JoystickConfigController::_activeJoystickChanged(Joystick* joystick)
             _stopCalibration();
         }
         _activeJoystick->startCalibrationMode(Joystick::CalibrationModeMonitor);
-        _rgAxisInfo = new struct AxisInfo[_axisCount];
+        _rgAxisInfo = new struct AxisInfo[_activeJoystick->_axisCount];
         _setInternalCalibrationValuesFromSettings();
         connect(_activeJoystick, &Joystick::rawAxisValueChanged, this, &JoystickConfigController::_axisValueChanged);
     }
